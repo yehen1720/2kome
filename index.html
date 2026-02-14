@@ -6,7 +6,7 @@
   <title>My App</title>
   <style>
     body { font-family: sans-serif; padding: 24px; }
-    button { font-size: 18px; padding: 12px 18px; }
+    button { font-size: 18px; padding: 12px 18px; margin-right: 8px; }
   </style>
 </head>
 
@@ -14,20 +14,26 @@
   <h1>りょうくんの最初のアプリ</h1>
 
   <div style="margin-top:16px;">
-  <p>カウント：<span id="count">0</span></p>
-  <button id="btn">+1</button>
-  <button id="reset">リセット</button>
-</div>
-
-  <p id="count">0</p>
-  <button id="btn">+1</button>
+    <p>カウント：<span id="count">0</span></p>
+    <button id="btn">+1</button>
+    <button id="reset">リセット</button>
+  </div>
 
   <script>
     let n = 0;
-    const count = document.getElementById("count");
-    document.getElementById("btn").addEventListener("click", () => {
+
+    const countEl = document.getElementById("count");
+    const btnEl = document.getElementById("btn");
+    const resetEl = document.getElementById("reset");
+
+    btnEl.addEventListener("click", () => {
       n++;
-      count.textContent = n;
+      countEl.textContent = n;
+    });
+
+    resetEl.addEventListener("click", () => {
+      n = 0;
+      countEl.textContent = n;
     });
   </script>
 </body>
