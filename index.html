@@ -3,8 +3,395 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Empty Page</title>
+  <title>Monty Hall Problem</title>
+  <style>
+    :root {
+      --bg: #f7f4ed;
+      --panel: #fffdf8;
+      --text: #1e2430;
+      --muted: #6b7280;
+      --accent: #c87941;
+      --line: #e8dcc8;
+      --good: #2f855a;
+      --bad: #c53030;
+      --door: #f3e4cf;
+      --door-open: #d7d2cb;
+      --door-selected: #ffe08a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top, #fff7eb 0%, #f7f4ed 45%, #efe7da 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      background: rgba(255, 253, 248, 0.9);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 18px 50px rgba(58, 44, 26, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(32px, 5vw, 52px);
+    }
+
+    .lead {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .status {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #fff4e8;
+      border: 1px solid #f1d5b9;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .doors {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .door {
+      border: 2px solid #d5b78f;
+      border-radius: 22px;
+      background: var(--door);
+      padding: 18px;
+      min-height: 210px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+
+    .door:hover {
+      transform: translateY(-3px);
+    }
+
+    .door.selected {
+      background: var(--door-selected);
+      border-color: #cf8c00;
+    }
+
+    .door.open {
+      background: var(--door-open);
+      border-color: #8b8b8b;
+    }
+
+    .door.final-win {
+      border-color: var(--good);
+      background: #dff3e8;
+    }
+
+    .door.final-lose {
+      border-color: var(--bad);
+      background: #fde7e7;
+    }
+
+    .door-title {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .door-body {
+      font-size: 18px;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .door button {
+      border: none;
+      border-radius: 999px;
+      background: var(--accent);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+
+    .door button:disabled {
+      cursor: default;
+      opacity: 0.45;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .actions button {
+      border: none;
+      border-radius: 999px;
+      padding: 13px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .secondary {
+      background: #e9dfcf;
+      color: #403224;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 720px) {
+      .wrap { padding: 20px; }
+      .doors, .stats { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
+  <main class="wrap">
+    <h1>Monty Hall Problem</h1>
+    <p class="lead">
+      One door has the prize and two doors are empty. Pick one door, then the host opens one empty door.
+      After that, decide whether to stay or switch and see what happens.
+    </p>
+
+    <div id="status" class="status"></div>
+
+    <section id="doors" class="doors" aria-label="Doors"></section>
+
+    <div class="actions">
+      <button id="stayButton" class="primary" type="button" disabled>Stay</button>
+      <button id="switchButton" class="primary" type="button" disabled>Switch</button>
+      <button id="resetButton" class="secondary" type="button">New Round</button>
+    </div>
+
+    <section class="stats" aria-label="Stats">
+      <div class="stat">
+        <span class="stat-label">Games</span>
+        <span id="gamesCount" class="stat-value">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Wins</span>
+        <span id="winsCount" class="stat-value">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Win Rate</span>
+        <span id="winRate" class="stat-value">0%</span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const doorsElement = document.getElementById("doors");
+    const statusElement = document.getElementById("status");
+    const stayButton = document.getElementById("stayButton");
+    const switchButton = document.getElementById("switchButton");
+    const resetButton = document.getElementById("resetButton");
+    const gamesCountElement = document.getElementById("gamesCount");
+    const winsCountElement = document.getElementById("winsCount");
+    const winRateElement = document.getElementById("winRate");
+
+    const state = {
+      prizeDoor: 0,
+      selectedDoor: null,
+      openedDoor: null,
+      stage: "pick",
+      games: 0,
+      wins: 0
+    };
+
+    function randomDoor() {
+      return Math.floor(Math.random() * 3);
+    }
+
+    function resetRound() {
+      state.prizeDoor = randomDoor();
+      state.selectedDoor = null;
+      state.openedDoor = null;
+      state.stage = "pick";
+      render();
+    }
+
+    function hostOpenDoor() {
+      const choices = [0, 1, 2].filter((door) => {
+        return door !== state.selectedDoor && door !== state.prizeDoor;
+      });
+      state.openedDoor = choices[Math.floor(Math.random() * choices.length)];
+      state.stage = "decide";
+    }
+
+    function getSwitchDoor() {
+      return [0, 1, 2].find((door) => {
+        return door !== state.selectedDoor && door !== state.openedDoor;
+      });
+    }
+
+    function finishRound(finalDoor) {
+      state.selectedDoor = finalDoor;
+      state.stage = "result";
+      state.games += 1;
+
+      if (state.selectedDoor === state.prizeDoor) {
+        state.wins += 1;
+      }
+
+      render();
+    }
+
+    function updateStats() {
+      const rate = state.games === 0 ? 0 : Math.round((state.wins / state.games) * 100);
+      gamesCountElement.textContent = state.games;
+      winsCountElement.textContent = state.wins;
+      winRateElement.textContent = rate + "%";
+    }
+
+    function getDoorBody(index) {
+      if (state.stage === "result") {
+        if (index === state.prizeDoor) {
+          return "Prize";
+        }
+        return "Empty";
+      }
+
+      if (state.openedDoor === index) {
+        return "Opened empty door";
+      }
+
+      return "Closed";
+    }
+
+    function getDoorClass(index) {
+      const classes = ["door"];
+
+      if (index === state.selectedDoor) {
+        classes.push("selected");
+      }
+
+      if (index === state.openedDoor) {
+        classes.push("open");
+      }
+
+      if (state.stage === "result") {
+        if (index === state.prizeDoor) {
+          classes.push("final-win");
+        } else if (index === state.selectedDoor) {
+          classes.push("final-lose");
+        }
+      }
+
+      return classes.join(" ");
+    }
+
+    function getStatusText() {
+      if (state.stage === "pick") {
+        return "Pick one door to start.";
+      }
+
+      if (state.stage === "decide") {
+        return "The host opened one empty door. Choose whether to stay or switch.";
+      }
+
+      if (state.selectedDoor === state.prizeDoor) {
+        return "You won. Your final door had the prize.";
+      }
+
+      return "You lost. The prize was behind a different door.";
+    }
+
+    function renderDoors() {
+      doorsElement.innerHTML = "";
+
+      for (let index = 0; index < 3; index += 1) {
+        const card = document.createElement("div");
+        card.className = getDoorClass(index);
+
+        const title = document.createElement("div");
+        title.className = "door-title";
+        title.textContent = "Door " + (index + 1);
+
+        const body = document.createElement("div");
+        body.className = "door-body";
+        body.textContent = getDoorBody(index);
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = state.selectedDoor === index ? "Selected" : "Choose";
+        button.disabled = state.stage !== "pick";
+        button.addEventListener("click", () => {
+          state.selectedDoor = index;
+          hostOpenDoor();
+          render();
+        });
+
+        card.append(title, body, button);
+        doorsElement.appendChild(card);
+      }
+    }
+
+    function render() {
+      statusElement.textContent = getStatusText();
+      stayButton.disabled = state.stage !== "decide";
+      switchButton.disabled = state.stage !== "decide";
+      renderDoors();
+      updateStats();
+    }
+
+    stayButton.addEventListener("click", () => {
+      finishRound(state.selectedDoor);
+    });
+
+    switchButton.addEventListener("click", () => {
+      finishRound(getSwitchDoor());
+    });
+
+    resetButton.addEventListener("click", resetRound);
+
+    resetRound();
+  </script>
 </body>
 </html>
