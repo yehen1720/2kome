@@ -15,6 +15,7 @@
 
   <div style="margin-top:16px;">
     <p>カウント：<span id="count">0</span></p>
+    <button id="decrement">-1</button>
     <button id="btn">+1</button>
     <button id="reset">リセット</button>
   </div>
@@ -23,8 +24,14 @@
     let n = 0;
 
     const countEl = document.getElementById("count");
+    const decrementEl = document.getElementById("decrement");
     const btnEl = document.getElementById("btn");
     const resetEl = document.getElementById("reset");
+
+    decrementEl.addEventListener("click", () => {
+      n--;
+      countEl.textContent = n;
+    });
 
     btnEl.addEventListener("click", () => {
       n++;
