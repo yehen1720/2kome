@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Monty Hall Problem</title>
+  <title>モンティホール問題</title>
   <style>
     :root {
       --bg: #f7f4ed;
@@ -23,7 +23,7 @@
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: "Yu Gothic", "Hiragino Sans", sans-serif;
       background:
         radial-gradient(circle at top, #fff7eb 0%, #f7f4ed 45%, #efe7da 100%);
       color: var(--text);
@@ -194,33 +194,33 @@
 </head>
 <body>
   <main class="wrap">
-    <h1>Monty Hall Problem</h1>
+    <h1>モンティホール問題</h1>
     <p class="lead">
-      One door has the prize and two doors are empty. Pick one door, then the host opens one empty door.
-      After that, decide whether to stay or switch and see what happens.
+      3つのドアのうち、1つに当たりがあり、2つはハズレです。最初に1つ選ぶと、司会者が残りのハズレのドアを1つ開けます。
+      そのあと、選んだままにするか、別のドアに変更するかを決めて結果を確認できます。
     </p>
 
     <div id="status" class="status"></div>
 
-    <section id="doors" class="doors" aria-label="Doors"></section>
+    <section id="doors" class="doors" aria-label="ドア"></section>
 
     <div class="actions">
-      <button id="stayButton" class="primary" type="button" disabled>Stay</button>
-      <button id="switchButton" class="primary" type="button" disabled>Switch</button>
-      <button id="resetButton" class="secondary" type="button">New Round</button>
+      <button id="stayButton" class="primary" type="button" disabled>そのままにする</button>
+      <button id="switchButton" class="primary" type="button" disabled>変更する</button>
+      <button id="resetButton" class="secondary" type="button">もう一度遊ぶ</button>
     </div>
 
-    <section class="stats" aria-label="Stats">
+    <section class="stats" aria-label="成績">
       <div class="stat">
-        <span class="stat-label">Games</span>
+        <span class="stat-label">プレイ回数</span>
         <span id="gamesCount" class="stat-value">0</span>
       </div>
       <div class="stat">
-        <span class="stat-label">Wins</span>
+        <span class="stat-label">勝利回数</span>
         <span id="winsCount" class="stat-value">0</span>
       </div>
       <div class="stat">
-        <span class="stat-label">Win Rate</span>
+        <span class="stat-label">勝率</span>
         <span id="winRate" class="stat-value">0%</span>
       </div>
     </section>
@@ -293,16 +293,16 @@
     function getDoorBody(index) {
       if (state.stage === "result") {
         if (index === state.prizeDoor) {
-          return "Prize";
+          return "当たり";
         }
-        return "Empty";
+        return "ハズレ";
       }
 
       if (state.openedDoor === index) {
-        return "Opened empty door";
+        return "司会者が開けたハズレ";
       }
 
-      return "Closed";
+      return "閉まっている";
     }
 
     function getDoorClass(index) {
@@ -329,18 +329,18 @@
 
     function getStatusText() {
       if (state.stage === "pick") {
-        return "Pick one door to start.";
+        return "最初に1つドアを選んでください。";
       }
 
       if (state.stage === "decide") {
-        return "The host opened one empty door. Choose whether to stay or switch.";
+        return "司会者がハズレのドアを1つ開けました。そのままにするか、変更するかを選んでください。";
       }
 
       if (state.selectedDoor === state.prizeDoor) {
-        return "You won. Your final door had the prize.";
+        return "当たりです。選んだドアの中に景品がありました。";
       }
 
-      return "You lost. The prize was behind a different door.";
+      return "ハズレです。景品は別のドアにありました。";
     }
 
     function renderDoors() {
@@ -352,7 +352,7 @@
 
         const title = document.createElement("div");
         title.className = "door-title";
-        title.textContent = "Door " + (index + 1);
+        title.textContent = "ドア " + (index + 1);
 
         const body = document.createElement("div");
         body.className = "door-body";
@@ -360,7 +360,7 @@
 
         const button = document.createElement("button");
         button.type = "button";
-        button.textContent = state.selectedDoor === index ? "Selected" : "Choose";
+        button.textContent = state.selectedDoor === index ? "選択中" : "このドアを選ぶ";
         button.disabled = state.stage !== "pick";
         button.addEventListener("click", () => {
           state.selectedDoor = index;
